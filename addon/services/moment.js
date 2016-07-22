@@ -52,5 +52,13 @@ export default Ember.Service.extend({
     }
 
     return time;
+  },
+  
+  getInstance() {
+    const locale = this.get('locale');
+    if (locale) {
+      moment.locale(locale);
+    }
+    return moment;
   }
 });
