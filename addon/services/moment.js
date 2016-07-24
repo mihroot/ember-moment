@@ -39,16 +39,27 @@ export default Ember.Service.extend({
   },
 
   moment() {
-    let time = moment(...arguments);
     const locale = this.get('locale');
     const timeZone = this.get('timeZone');
 
-    if (locale) {
-      time = time.locale(locale);
+    let _timeZoneSetNAvailable = timeZone && moment.tz ? true : false;
+
+    let time;
+    if (_timeZoneSetNAvailable) {
+      if (arguments.length) {
+        let _args = [...arguments];
+        _args.push(timeZone);
+        time = moment.tz.apply(null, _args);
+      } else {
+        time = moment(...arguments);
+        time = time.tz(timeZone);
+      }
+    } else {
+      time = moment(...arguments);
     }
 
-    if (timeZone && time.tz) {
-      time = time.tz(timeZone);
+    if (locale) {
+      time = time.locale(locale);
     }
 
     return time;
