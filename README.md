@@ -29,9 +29,10 @@ Ships with the following computed property macros: `duration`, `humanize`, `loca
 ## Helpers
 
 ```hbs
-{{moment-format date outputFormat inputFormat}} {{!-- outputFormat and inputFormat is optional --}}
-{{moment-from-now date hideSuffix=true}} {{!-- hideSuffix is optional --}}
-{{moment-to-now date hidePrefix=true}} {{!-- hidePrefix is optional --}}
+{{moment '12-25-1995' 'MM-DD-YYYY'}}
+{{moment-format '12-25-1995' 'MM/DD/YYYY' 'MM-DD-YYYY'}} {{!-- outputFormat and inputFormat are optional --}}
+{{moment-from-now (now) hideSuffix=true}} {{!-- hideSuffix is optional --}}
+{{moment-to-now (unix timeStamp) date hidePrefix=true}} {{!-- hidePrefix is optional --}}
 {{moment-duration number units}} {{!-- units is optional --}}
 {{moment-calendar date referenceDate}} {{!-- reference date is optional --}}
 {{is-before date comparison precision='year'}} {{!-- precision is optional --}}
@@ -45,7 +46,7 @@ Ships with the following computed property macros: `duration`, `humanize`, `loca
 ### Live Updating of Displayed Time
 
 ```hbs
-{{moment-from-now date interval=1000}} // interval is in ms
+{{moment-from-now (now) interval=1000}} // interval is in ms
 ```
 
 Recomputes the time ago every 1-second (1000 milliseconds).  This is useful for "live" updating as time elapses.
@@ -94,7 +95,7 @@ module.exports = function() {
 };
 ```
 
-If you need to change the default format during runtime, use the service API.  During so, will trigger the moment-format helper instances to re-render with the new default format.
+If you need to change the default format during runtime, use the service API.  Doing so will cause the moment-format helper instances to re-render with the new default format.
 
 ```js
 // app/controller/index.js
@@ -109,7 +110,7 @@ export default Ember.Controller.extend({
 ```
 ### Global Allow Empty Dates
 
-If `null`, `undefined`, or an empty string as a date to any of the moment helpers then you you will `Invalid Date` in the output.  To avoid this issue globally, you can set the option `allowEmpty` which all of the helpers respect and will result in nothing being rendered instead of `Invalid Date`.
+If `null`, `undefined`, or an empty string are passed as a date to any of the moment helpers then you will get `Invalid Date` in the output.  To avoid this issue globally, you can set the option `allowEmpty` which all of the helpers respect and will result in nothing being rendered instead of `Invalid Date`.
 
 ```js
 // config/environment.js
@@ -150,6 +151,8 @@ module.exports = function(environment) {
   };
 ```
 
+*NOTE: English is bundled automatically, not need to add `en` in `includeLocales`*
+
 #### Write all the locales to a folder relative to `dist`
 
 Alternatively, you can copy all of moment's locale files into your `dist` directory.
@@ -181,7 +184,7 @@ Ember.$.getScript('/assets/moment-locales/fr.js');
 export default Ember.Route.extend({
   moment: Ember.inject.service(),
   beforeModel() {
-    this.get('moment').changeLocale('es');
+    this.get('moment').setLocale('es');
   }
 });
 ```
@@ -193,7 +196,7 @@ export default Ember.Route.extend({
 export default Ember.Route.extend({
   moment: Ember.inject.service(),
   beforeModel() {
-    this.get('moment').changeTimeZone('America/Los_Angeles');
+    this.get('moment').setTimeZone('America/Los_Angeles');
   }
 });
 ```
@@ -204,8 +207,8 @@ All helpers accept a `locale` and `timeZone` argument, which is a string.  This 
 
 ```hbs
 {{moment-format date locale='es' timeZone='America/Los_Angeles'}}
-{{moment-duration date locale='es' timeZone='America/Los_Angeles' timeZone='America/Los_Angeles'}}
-{{moment-from-now date locale='es' timeZone='America/Los_Angeles'}}
+{{moment-duration (now) date locale='es' timeZone='America/Los_Angeles'}}
+{{moment-from-now (now) date locale='es' timeZone='America/Los_Angeles'}}
 {{moment-to-now date locale='es' timeZone='America/Los_Angeles'}}
 ```
 

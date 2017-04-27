@@ -1,7 +1,6 @@
 import Ember from 'ember';
 
-const { observer, inject, Helper } = Ember;
-const { bind:runBind } = Ember.run;
+const { observer, inject, get, Helper, run } = Ember;
 
 export default Helper.extend({
   moment: inject.service(),
@@ -12,23 +11,31 @@ export default Helper.extend({
   }),
 
   compute(value, { interval }) {
-    if (this.get('disableInterval')) { return; }
+    if (get(this, 'disableInterval')) { return; }
 
     this.clearTimer();
 
     if (interval) {
-      this.intervalTimer = setTimeout(runBind(this, this.recompute), parseInt(interval, 10));
+      /*
+       * NOTE: intentionally a setTimeout so tests do not block on it
+       * as the run loop queue is never clear so tests will stay locked waiting
+       * for queue to clear.
+       */
+      this.intervalTimer = setTimeout(() => {
+        run(() => this.recompute());
+      }, parseInt(interval, 10));
     }
   },
 
   morphMoment(time, { locale, timeZone }) {
-    locale = locale || this.get('moment.locale');
+    const momentService = get(this, 'moment');
 
-    if (locale) {
+    locale = locale || get(momentService, 'locale');
+    timeZone = timeZone || get(momentService, 'timeZone');
+
+    if (locale && time.locale) {
       time = time.locale(locale);
     }
-
-    timeZone = timeZone || this.get('moment.timeZone');
 
     if (timeZone && time.tz) {
       time = time.tz(timeZone);
